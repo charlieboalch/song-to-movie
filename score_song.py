@@ -52,7 +52,7 @@ def analyze_features(song_features):
               + (0.1 * (110 / song_features['tempo'])))
 
     # humor - take valence, energy, loudness into account (high everything)
-    humor = (0.5 * valence) + (0.3 * energy) + (0.2 * (-1 * abs(song_features['loudness']) / 60 + 1))
+    humor = (0.7 * valence) + (0.2 * energy) + (0.1 * (-1 * abs(song_features['loudness']) / 60 + 1))
 
     return [valence, energy, darkness, tension, warmth, humor]
 
