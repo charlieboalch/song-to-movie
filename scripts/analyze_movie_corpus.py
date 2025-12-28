@@ -105,7 +105,7 @@ def analyze_movie(movie, id):
 
 if __name__ == '__main__':
     # parse all cached movies in the movie directory
-    movie_list = [x.replace(".json", "") for x in os.listdir("cache/movies")]
+    movie_list = [x.replace(".json", "") for x in os.listdir("../cache/movies")]
 
     # csv file columns
     columns = [["movie", "valence", "energy", "darkness", "tension", "warmth", "humor"]]
@@ -122,12 +122,12 @@ if __name__ == '__main__':
                         scored_data[3], scored_data[4], scored_data[5]])
 
     # save to csv
-    with open('data/movies.csv', 'w', newline='', encoding='utf-8') as f:
+    with open('../data/movies.csv', 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f, delimiter=',')
         writer.writerows(columns)
 
     # reload as dataframe to z score
-    df = pd.read_csv("data/movies.csv", encoding='utf-8')
+    df = pd.read_csv("../data/movies.csv", encoding='utf-8')
 
     cols = ['valence', 'energy', 'darkness', 'tension', 'warmth', 'humor']
     movie_stats = {}
@@ -139,5 +139,5 @@ if __name__ == '__main__':
         df[col] = (df[col] - mean) / std
 
     df.to_csv('data/movies-z.csv')
-    with open('data/movies-stats.json', 'w') as f:
+    with open('../data/movies-stats.json', 'w') as f:
         f.writelines(json.dumps(movie_stats))
