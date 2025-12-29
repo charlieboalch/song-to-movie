@@ -1,15 +1,20 @@
-from ranker import MovieRanker
-from score_song import score_song
+import csv
+import json
+import os
 
-spotify_id = ['TCACP1639765']
-ranker = MovieRanker()
+import pandas as pd
 
-for sid in spotify_id:
-    song, song_vec = score_song(sid)
-    movies, scores = ranker.top_k_movies(song_vec)
+df = pd.read_csv("data/movies-url.csv", encoding='utf-8')
 
-    print(f'Movies similar to {song}:')
-    for i in range(len(movies)):
-        print(f'{movies[i]} ({scores[i]})')
-    print()
+cols = ['valence', 'energy', 'darkness', 'tension', 'warmth', 'humor']
+movie_stats = {}
 
+for col in cols:
+    mean = df[col].mean()
+    std = df[col].std()
+    movie_stats[col] = (mean, std)
+    df[col] = (df[col] - mean) / std
+
+df.to_csv('movies-z.csv')
+with open('data/movies-stats.json', 'w') as f:
+    f.writelines(json.dumps(movie_stats))

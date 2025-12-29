@@ -26,8 +26,8 @@ def rank_movies():
         for i in range(len(vector)):
             average_vector[i] += (vector[i] * (1 / len(songs)))
 
-    movie_titles, movie_scores = ranker.top_k_movies(average_vector)
+    movie_titles, movie_scores, movie_urls = ranker.top_k_movies(average_vector, k=6)
     for i in range(len(movie_titles)):
-        results['movies'].append({'movie': movie_titles[i], 'score': movie_scores[i]})
+        results['movies'].append({'movie': movie_titles[i], 'score': movie_scores[i], 'url': movie_urls[i]})
 
     return results
