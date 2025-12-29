@@ -1,6 +1,6 @@
 import json
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from starlette.responses import StreamingResponse
 
 from ranker import MovieRanker
@@ -15,10 +15,15 @@ def hello():
     return 'hello, world'
 
 
-async def generate_vectors(song_vectors: list[str]):
+async def generate_vectors(request, song_vectors: list[str]):
     average_vector = [0] * 6
 
     for song_id in song_vectors:
+        if await request.is_disconnected():
+            print("Client disconnected, stopping stream")
+            await request.close()
+            return
+
         title, vector = score_song(song_id)
 
         for i in range(len(vector)):
@@ -32,13 +37,14 @@ async def generate_vectors(song_vectors: list[str]):
         movie_results.append({'movie': movie_titles[i], 'score': movie_scores[i], 'url': movie_urls[i]})
 
     yield f"data: {json.dumps({'movies': movie_results})}\n\n"
+    await request.close()
 
 
 
 @app.get('/rank_movies')
-async def rank_movies(songs: str = ''):
+async def rank_movies(request: Request, songs: str = ''):
     songs = songs.split(',')
     if len(songs) == 0:
         raise HTTPException(status_code=400, detail='Invalid request format')
 
-    return StreamingResponse(generate_vectors(songs), media_type="text/event-stream")
+    return StreamingResponse(generate_vectors(request, songs), media_type="text/event-stream")
