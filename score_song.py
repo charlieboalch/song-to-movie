@@ -60,7 +60,10 @@ def analyze_features(song_features):
 # analyze lyrics using roberta and sbert
 def analyze_lyrics(track_title, track_artist):
     # fetch lyrics
-    song = genius.search_song(track_title, track_artist)
+    try:
+        song = genius.search_song(track_title, track_artist)
+    except:
+        return None
 
     # return if song not found or no lyrics
     if song is None:
