@@ -16,7 +16,7 @@ with open('data/movies-stats.json', 'r') as f:
     movie_stats = json.loads(''.join(f.readlines()))
 
 cols = ['valence', 'energy', 'darkness', 'tension', 'warmth', 'humor']
-offsets = [-0.4, -0.4, 0.1, -0.4, -0.4, -0.6]
+offsets = [-0.6, -0.5, 0.1, -0.4, -0.4, -0.7]
 
 # fetch track metadata given a spotify ID / IRSC ID
 def fetch_recco_id(spotify_id):

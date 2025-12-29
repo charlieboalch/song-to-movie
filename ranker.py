@@ -2,7 +2,7 @@ import faiss
 import numpy as np
 import pandas as pd
 
-weight = np.array([2, 0.75, 1, 1, 1, 0.8])
+weight = np.array([2, 0.75, 1, 1, 1, 0.75])
 
 class MovieRanker:
     def __init__(self):
