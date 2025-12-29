@@ -16,7 +16,7 @@ with open('data/movies-stats.json', 'r') as f:
     movie_stats = json.loads(''.join(f.readlines()))
 
 cols = ['valence', 'energy', 'darkness', 'tension', 'warmth', 'humor']
-offsets = [-0.6, -0.5, 0.1, -0.4, -0.4, -0.7]
+offsets = [-0.55, -0.45, 0.1, -0.4, -0.3, -0.7]
 
 # fetch track metadata given a spotify ID / IRSC ID
 def fetch_recco_id(spotify_id):
@@ -49,8 +49,8 @@ def analyze_features(song_features):
                + (0.3 * song_features['danceability']))
 
     # warmth - take acousticness, mode, and tempo into account (high acousticness, major chord, slower tempo)
-    warmth = ((0.5 * song_features['acousticness']) + (0.2 if song_features['mode'] == 1 else 0)
-              + (0.1 * (110 / song_features['tempo'])))
+    warmth = ((0.5 * song_features['acousticness']) + (0.35 if song_features['mode'] == 1 else 0)
+              + (0.15 * (110 / song_features['tempo'])))
 
     # humor - take valence, energy, loudness into account (high everything)
     humor = (0.7 * valence) + (0.2 * energy) + (0.1 * (-1 * abs(song_features['loudness']) / 60 + 1))

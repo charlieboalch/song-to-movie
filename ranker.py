@@ -50,9 +50,6 @@ class MovieRanker:
         # intersection of the two searches
         intersection = np.intersect1d(cos_indices[0], l2_indices[0])
 
-        # normalize L2 vector
-        l2_norm = 1 - (l2 - l2.min()) / (l2.max() - l2.min())
-
         # map movie ids to scores
         score_by_movie = {}
 
@@ -64,8 +61,8 @@ class MovieRanker:
             # add to map
             # scores - cosine[0][cos_idx] and l2_norm[0][l2_idx]
             score_by_movie[movie_id] = (
-                    0.3 * cos_idx +
-                    0.7 * l2_idx
+                    0.5 * cos_idx +
+                    0.5 * l2_idx
             )
 
         # limit to k and sort based on score
