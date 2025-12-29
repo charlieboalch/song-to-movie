@@ -16,6 +16,7 @@ with open('data/movies-stats.json', 'r') as f:
     movie_stats = json.loads(''.join(f.readlines()))
 
 cols = ['valence', 'energy', 'darkness', 'tension', 'warmth', 'humor']
+offsets = [-0.4, -0.4, 0.1, -0.4, -0.4, -0.6]
 
 # fetch track metadata given a spotify ID / IRSC ID
 def fetch_recco_id(spotify_id):
@@ -37,10 +38,10 @@ def analyze_features(song_features):
     valence = song_features['valence']
 
     # take tempo into account too
-    energy = song_features['energy'] * 0.7 + (0.3 * (song_features['tempo'] / 110))
+    energy = song_features['energy'] * 0.55 + (0.45 * (song_features['tempo'] / 110))
 
     # darkness - take loudness, mood, and mode into account (low loudness, low mood, minor chord)
-    darkness = ((abs(song_features['loudness']) / 60 * 0.5) * ((1 - valence) * 0.3)
+    darkness = ((abs(song_features['loudness']) / 60 * 0.25) * ((1 - valence) * 0.5)
                 + (0.25 if song_features['mode'] == 0 else 0))
 
     # tension - take tempo, mode, and danceability (high tempo, minor chord, high danceability)
@@ -108,7 +109,7 @@ def generate_song_vector(spotify_id):
     combined_vector = [0] * 6
     for i in range(len(feature_vector)):
         if lyric_vector is not None:
-            combined_vector[i] = lyric_vector[i - 1] * 0.5 + (feature_vector[i] - 0.4 + movie_stats[cols[i]][0]) * 0.5
+            combined_vector[i] = lyric_vector[i - 1] * 0.6 + (feature_vector[i] + offsets[i] + movie_stats[cols[i]][0]) * 0.4
         else:
             combined_vector[i] = feature_vector[i] - 0.4 + movie_stats[cols[i]][0]
 

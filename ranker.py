@@ -2,7 +2,7 @@ import faiss
 import numpy as np
 import pandas as pd
 
-weight = np.array([2, 0.75, 1, 1, 1, 1.25])
+weight = np.array([2, 0.75, 1, 1, 1, 0.8])
 
 class MovieRanker:
     def __init__(self):
@@ -38,8 +38,6 @@ class MovieRanker:
         song_vec = np.array(song_vector).astype("float32") * weight
         song_norm = np.linalg.norm(song_vec)
         song_vec_normal = song_vec / song_norm
-
-        print(song_vec)
 
         # faiss expects 2d vector
         song_unit = song_vec_normal.reshape(1, -1)
@@ -81,6 +79,7 @@ class MovieRanker:
         scores = [s for _, s in ranked]
 
         titles = self.df.loc[movie_ids]['movie'].tolist()
+        urls = self.df.loc[movie_ids]['url'].tolist()
 
         # return movie titles
-        return titles, scores
+        return titles, scores, urls
