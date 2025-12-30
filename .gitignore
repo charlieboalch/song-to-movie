@@ -1,6 +1,5 @@
 .venv/
 .env
 cache/
-data/
 
 .idea/
