@@ -16,7 +16,7 @@ with open('data/movies-stats.json', 'r') as f:
     movie_stats = json.loads(''.join(f.readlines()))
 
 cols = ['valence', 'energy', 'darkness', 'tension', 'romance', 'humor']
-offsets = [-0.55, -0.45, 0.1, -0.4, -0.3, -0.7]
+offsets = [-0.7, -0.45, -0.1, -0.4, -0.25, -0.65]
 
 # fetch track metadata given a spotify ID / IRSC ID
 def fetch_recco_id(spotify_id):
@@ -112,9 +112,9 @@ def generate_song_vector(spotify_id):
     combined_vector = [0] * 6
     for i in range(len(feature_vector)):
         if lyric_vector is not None:
-            combined_vector[i] = lyric_vector[i - 1] * 0.6 + (feature_vector[i] + offsets[i] + movie_stats[cols[i]][0]) * 0.4
+            combined_vector[i] = lyric_vector[i - 1] * 0.5 + (feature_vector[i] + offsets[i] + movie_stats[cols[i]][0]) * 0.5
         else:
-            combined_vector[i] = feature_vector[i] - 0.4 + movie_stats[cols[i]][0]
+            combined_vector[i] = feature_vector[i] + offsets[i] + movie_stats[cols[i]][0]
 
     # write to cache
     with open(f"cache/songs/{spotify_id}.json", "w") as f:

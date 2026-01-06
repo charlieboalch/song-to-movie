@@ -1,6 +1,8 @@
 import json
 
+import spotipy
 from fastapi import FastAPI, HTTPException, Request
+from spotipy import SpotifyClientCredentials
 from starlette.responses import StreamingResponse
 
 from ranker import MovieRanker
@@ -8,6 +10,9 @@ from score_song import score_song
 
 app = FastAPI()
 ranker = MovieRanker()
+
+auth_manager = SpotifyClientCredentials()
+sp = spotipy.Spotify(auth_manager=auth_manager)
 
 
 @app.get('/hello')
@@ -48,3 +53,12 @@ async def rank_movies(request: Request, songs: str = ''):
         raise HTTPException(status_code=400, detail='Invalid request format')
 
     return StreamingResponse(generate_vectors(request, songs), media_type="text/event-stream")
+
+
+@app.get('/search')
+async def search_song(song: str = ''):
+    if song == '':
+        raise HTTPException(status_code=400, detail='Invalid request format')
+
+    search = sp.search(song, type='track')
+    return search['tracks']['items'][0]
