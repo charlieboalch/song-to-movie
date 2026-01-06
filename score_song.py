@@ -15,7 +15,7 @@ genius.verbose = False
 with open('data/movies-stats.json', 'r') as f:
     movie_stats = json.loads(''.join(f.readlines()))
 
-cols = ['valence', 'energy', 'darkness', 'tension', 'warmth', 'humor']
+cols = ['valence', 'energy', 'darkness', 'tension', 'romance', 'humor']
 offsets = [-0.55, -0.45, 0.1, -0.4, -0.3, -0.7]
 
 # fetch track metadata given a spotify ID / IRSC ID

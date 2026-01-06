@@ -12,9 +12,9 @@ from util.vectors import MediaVector
 emotion_model = pipeline(task="text-classification", model="SamLowe/roberta-base-go_emotions", top_k=None)
 
 emotion_map = {
-    'admiration': [0, 0, -0.1, 0, 0.2, 0],
+    'admiration': [0, 0, -0.1, 0, 0.1, 0],
     'amusement': [0.1, 0.05, 0, 0, 0, 0.1],
-    'anger': [-0.1, 0, 0.1, 0, -0.1, 0],
+    'anger': [-0.1, 0, 0.05, 0.1, 0, 0],
     'optimism': [0.2, 0, -0.1, 0, 0, 0],
     'sadness': [-0.1, 0, 0, 0, 0, 0],
     'love': [0, 0, 0, 0, 0.1, 0],
@@ -24,28 +24,28 @@ emotion_map = {
     'desire': [0, 0, 0, 0.05, 0.1, 0],
     'disgust': [-0.05, 0, 0.05, 0, -0.1, 0],
     'fear': [0, 0.05, 0.05, 0.1, 0, 0],
-    'nervousness': [0, 0, 0, 0.1, 0, 0],
-    'annoyance': [0, 0, 0.05, 0.05, -0.05, 0],
-    'embarrassment': [0, 0, 0, 0.1, 0, 0],
+    'nervousness': [0, 0, 0, 0.1, 0.02, 0],
+    'annoyance': [0, 0, 0.05, 0.05, 0, 0],
+    'embarrassment': [0, 0, 0, 0.1, 0.02, 0],
     'disappointment': [-0.05, 0, 0, 0, 0, 0],
     'curiosity': [0, 0.05, 0, 0.05, 0, 0],
     'confusion': [0, 0, 0, 0.05, 0, 0],
-    'remorse': [0, 0, -0.1, 0, 0.05, 0],
-    'caring': [0.05, 0, -0.05, 0, 0.1, 0]
+    'remorse': [0, 0, -0.1, 0, 0, 0],
+    'caring': [0.05, 0, -0.05, 0, 0.05, 0]
 }
 
 genre_map = {
-    'Romance': [0, 0, 0, 0.05, 0.15, 0],
+    'Romance': [0, 0, 0, 0.05, 0.2, 0],
     'Crime': [0, 0.1, 0.1, 0, 0, 0],
-    'Drama': [0, -0.1, 0, 0.1, 0, 0],
-    'Action': [0, 0.2, 0, 0.05, 0, 0],
+    'Drama': [0, -0.1, 0, 0.1, 0.1, 0],
+    'Action': [0, 0.2, 0, 0.05, -0.1, 0],
     'Comedy': [0.2, 0, 0, 0, 0, 0.2],
     'Adventure': [0, 0.15, 0, 0, 0, 0],
-    'Thriller': [0, 0.1, 0.05, 0.2, 0, 0],
+    'Thriller': [0, 0.1, 0.05, 0.2, -0.1, 0],
     'Mystery': [0, 0, 0, 0.2, 0, 0],
-    'War': [0, 0.05, 0.15, 0, -0.1, 0],
+    'War': [0, 0.05, 0.15, 0, -0.05, 0],
     'Horror': [0, 0, 0.25, 0.05, -0.1, 0],
-    'Family': [0.1, 0, 0, 0, 0.15, 0]
+    'Family': [0.1, 0, 0, 0, 0.05, 0]
 }
 
 def chunk_plot(plot: str) -> list[str]:
@@ -105,10 +105,10 @@ def analyze_movie(movie, id):
 
 if __name__ == '__main__':
     # parse all cached movies in the movie directory
-    movie_list = [x.replace(".json", "") for x in os.listdir("../cache/movies")]
+    movie_list = [x.replace(".json", "") for x in os.listdir("cache/movies")]
 
     # csv file columns
-    columns = [["movie", "valence", "energy", "darkness", "tension", "warmth", "humor"]]
+    columns = [["movie", "valence", "energy", "darkness", "tension", "romance", "humor"]]
 
     # load and analyze
     for i in movie_list:
@@ -122,14 +122,14 @@ if __name__ == '__main__':
                         scored_data[3], scored_data[4], scored_data[5]])
 
     # save to csv
-    with open('../data/movies.csv', 'w', newline='', encoding='utf-8') as f:
+    with open('data/movies.csv', 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f, delimiter=',')
         writer.writerows(columns)
 
     # reload as dataframe to z score
-    df = pd.read_csv("../data/movies.csv", encoding='utf-8')
+    df = pd.read_csv("data/movies.csv", encoding='utf-8')
 
-    cols = ['valence', 'energy', 'darkness', 'tension', 'warmth', 'humor']
+    cols = ['valence', 'energy', 'darkness', 'tension', 'romance', 'humor']
     movie_stats = {}
 
     for col in cols:
@@ -139,5 +139,5 @@ if __name__ == '__main__':
         df[col] = (df[col] - mean) / std
 
     df.to_csv('data/movies-z.csv')
-    with open('../data/movies-stats.json', 'w') as f:
+    with open('data/movies-stats.json', 'w') as f:
         f.writelines(json.dumps(movie_stats))

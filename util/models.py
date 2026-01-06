@@ -2,32 +2,36 @@ import torch
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-from util.embeddings import ENERGY_WORDS, HUMOR_WORDS, WARMTH_WORDS, TENSION_WORDS, DARKNESS_WORDS
+from util.embeddings import ENERGY_WORDS, HUMOR_WORDS, TENSION_WORDS, DARKNESS_WORDS, ROMANCE_WORDS
 
-sentiment_model_path = "cardiffnlp/twitter-roberta-base-sentiment"
-tokenizer = AutoTokenizer.from_pretrained(sentiment_model_path)
+sentiment_model_path = "cardiffnlp/twitter-xlm-roberta-base-sentiment"
+tokenizer = AutoTokenizer.from_pretrained(sentiment_model_path, use_fast=True)
 sentiment_model = AutoModelForSequenceClassification.from_pretrained(sentiment_model_path)
 
-embeddings = SentenceTransformer("all-MiniLM-L6-v2")
+embeddings = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
 darkness = (embeddings.encode(DARKNESS_WORDS['pos']), embeddings.encode(DARKNESS_WORDS['neg']))
 tension = (embeddings.encode(TENSION_WORDS['pos']), embeddings.encode(TENSION_WORDS['neg']))
-warmth = (embeddings.encode(WARMTH_WORDS['pos']), embeddings.encode(WARMTH_WORDS['neg']))
+romance = (embeddings.encode(ROMANCE_WORDS['pos']), embeddings.encode(ROMANCE_WORDS['neg']))
 energy = (embeddings.encode(ENERGY_WORDS['pos']), embeddings.encode(ENERGY_WORDS['neg']))
 humor = (embeddings.encode(HUMOR_WORDS['pos']), embeddings.encode(HUMOR_WORDS['neg']))
 
-dimensions = [energy, darkness, tension, warmth, humor]
+dimensions = [energy, darkness, tension, romance, humor]
 
 def run_embeddings(chunked):
     encoded = [embeddings.encode(x) for x in chunked]
     result = []
+
     for i in dimensions:
         pos_tensor = embeddings.similarity(encoded, i[0])
         neg_tensor = embeddings.similarity(encoded, i[1])
 
+        pos_average = torch.mean(pos_tensor, dim=0)
+        neg_average = torch.mean(neg_tensor, dim=0)
+
         k = min(len(encoded), 2)
         # take 3 largest values to eliminate background noise from plot
-        top_val = (torch.mean(torch.topk(pos_tensor, k=k, dim=0)[0])
-                   - torch.mean(torch.topk(neg_tensor, k=k, dim=0)[0]))
+        top_val = (torch.mean(torch.topk(pos_average, k=k, dim=0)[0])
+                   - torch.mean(torch.topk(neg_average, k=k, dim=0)[0]))
         result.append(top_val.item())
 
     return result
