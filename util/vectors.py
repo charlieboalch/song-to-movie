@@ -1,10 +1,10 @@
 class MediaVector:
-    def __init__(self, valence, energy, darkness, tension, warmth, humor):
+    def __init__(self, valence, energy, darkness, tension, romance, humor):
         self.valence = valence
         self.energy = energy
         self.darkness = darkness
         self.tension = tension
-        self.warmth = warmth
+        self.romance = romance
         self.humor = humor
 
     def adjust_rankings(self, array):
@@ -12,8 +12,8 @@ class MediaVector:
         self.energy += array[1]
         self.darkness += array[2]
         self.tension += array[3]
-        self.warmth += array[4]
+        self.romance += array[4]
         self.humor += array[5]
 
     def to_list(self):
-        return [self.valence, self.energy, self.darkness, self.tension, self.warmth, self.humor]
+        return [self.valence, self.energy, self.darkness, self.tension, self.romance, self.humor]

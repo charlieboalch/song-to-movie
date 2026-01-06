@@ -11,7 +11,7 @@ class MovieRanker:
         self.df = df
 
         # only look at vector columns
-        cols = ['valence', 'energy', 'darkness', 'tension', 'warmth', 'humor']
+        cols = ['valence', 'energy', 'darkness', 'tension', 'romance', 'humor']
         movie_vectors = df[cols].values.astype("float32")
 
         # normalize movie vector in preparation of indexing

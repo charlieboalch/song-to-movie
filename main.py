@@ -9,7 +9,7 @@ import requests
 def generate_stats():
     df = pd.read_csv("data/movies-url.csv", encoding='utf-8')
 
-    cols = ['valence', 'energy', 'darkness', 'tension', 'warmth', 'humor']
+    cols = ['valence', 'energy', 'darkness', 'tension', 'romance', 'humor']
     movie_stats = {}
 
     for col in cols:
@@ -32,8 +32,8 @@ def load_urls():
 
     auth_header = {'Authorization': f"Bearer {TMDB_API}"}
 
-    columns = [["movie", "valence", "energy", "darkness", "tension", "warmth", "humor", "url"]]
-    cols = ['valence', 'energy', 'darkness', 'tension', 'warmth', 'humor']
+    columns = [["movie", "valence", "energy", "darkness", "tension", "romance", "humor", "url"]]
+    cols = ['valence', 'energy', 'darkness', 'tension', 'romance', 'humor']
 
     for file in os.listdir('cache/vectors'):
         print(file)
