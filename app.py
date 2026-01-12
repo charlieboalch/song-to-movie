@@ -49,6 +49,8 @@ async def generate_vectors(request, song_vectors: list[str]):
 @app.get('/rank_movies')
 async def rank_movies(request: Request, songs: str = ''):
     songs = songs.split(',')
+    songs = list(dict.fromkeys(songs))
+
     if len(songs) == 0:
         raise HTTPException(status_code=400, detail='Invalid request format')
 

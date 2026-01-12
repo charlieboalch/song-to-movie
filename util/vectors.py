@@ -7,6 +7,10 @@ class MediaVector:
         self.romance = romance
         self.humor = humor
 
+    @staticmethod
+    def from_list(array):
+        return MediaVector(array[0], array[1], array[2], array[3], array[4], array[5])
+
     def adjust_rankings(self, array):
         self.valence += array[0]
         self.energy += array[1]

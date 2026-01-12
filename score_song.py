@@ -7,6 +7,7 @@ import requests
 from lyricsgenius import Genius
 
 from util.models import run_embeddings, get_valence
+from util.vectors import MediaVector
 
 dotenv.load_dotenv()
 genius = Genius(os.getenv('GENIUS_API'))
@@ -31,6 +32,7 @@ def fetch_song_features(recco_id):
     url = f"https://api.reccobeats.com/v1/track/{recco_id}/audio-features"
 
     r = requests.get(url)
+
     return r.json()
 
 # analyze audio features
@@ -56,6 +58,33 @@ def analyze_features(song_features):
     humor = (0.7 * valence) + (0.2 * energy) + (0.1 * (-1 * abs(song_features['loudness']) / 60 + 1))
 
     return [valence, energy, darkness, tension, warmth, humor]
+
+# generate a list of vectors given song features to adjust lyric analysis results
+def generate_adjustments(song_features):
+    normal_loudness = (song_features['loudness'] + 60) / 60
+
+    # acousticness - higher romance (more intimate)
+    acoustic = [0, 0, 0, 0, 0.2 * (song_features['acousticness'] - 0.5), 0]
+
+    # danceability - higher energy, higher tension (rhythmically engaging)
+    dance = [0, 0.1 * (song_features['danceability'] - 0.5), 0, 0.15 * (song_features['danceability'] - 0.5), 0, 0]
+
+    # energy - higher energy (duh), small to prevent double-dipping with dance
+    energy = [0, 0.2 * (song_features['energy'] - 0.5), 0, 0, 0, 0]
+
+    # loudness - higher humor, higher darkness
+    loud = [0, 0, 0.1 * normal_loudness, 0, 0, 0.1 * normal_loudness]
+
+    # mode - minor means lower valence, higher darkness, higher tension, lower humor;
+    # major means higher valence, lower darkness, lower tension, higher humor
+    # minor has song_features['mode'] = 0, major = 1
+    mode_offset = (song_features['mode'] - 0.5) * 2
+    mode = [0.1 * mode_offset, 0, 0.2 * mode_offset, 0.1 * mode_offset, 0, 0.1 * mode_offset]
+
+    # valence - higher valence
+    valence = [0.75 * (song_features['valence'] - 0.5), 0, 0, 0, 0, 0]
+
+    return [acoustic, dance, energy, loud, mode, valence]
 
 # analyze lyrics using roberta and sbert
 def analyze_lyrics(track_title, track_artist):
@@ -105,16 +134,23 @@ def generate_song_vector(spotify_id):
     song_features = fetch_song_features(recco_id)
 
     # generate vectors from two different sources
-    feature_vector = analyze_features(song_features)
     lyric_vector = analyze_lyrics(track_title, artist)
+    combined_vector = MediaVector.from_list(lyric_vector)
 
-    # combine the two with 40% lyrics and 60% audio features
-    combined_vector = [0] * 6
-    for i in range(len(feature_vector)):
-        if lyric_vector is not None:
-            combined_vector[i] = lyric_vector[i - 1] * 0.5 + (feature_vector[i] + offsets[i] + movie_stats[cols[i]][0]) * 0.5
-        else:
-            combined_vector[i] = feature_vector[i] + offsets[i] + movie_stats[cols[i]][0]
+    vector_offsets = generate_adjustments(song_features)
+    for i in vector_offsets:
+        combined_vector.adjust_rankings(i)
+
+    # # combine the two with 40% lyrics and 60% audio features
+    # feature_vector = analyze_features(song_features)
+    # combined_vector = [0] * 6
+    # for i in range(len(feature_vector)):
+    #     if lyric_vector is not None:
+    #         combined_vector[i] = lyric_vector[i - 1] * 0.5 + (feature_vector[i] + offsets[i] + movie_stats[cols[i]][0]) * 0.5
+    #     else:
+    #         combined_vector[i] = feature_vector[i] + offsets[i] + movie_stats[cols[i]][0]
+
+    combined_vector = combined_vector.to_list()
 
     # write to cache
     with open(f"cache/songs/{spotify_id}.json", "w") as f:
